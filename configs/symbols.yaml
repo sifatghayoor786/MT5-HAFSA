@@ -1,0 +1,25 @@
+# Canonical trading universe. Broker-specific names are auto-discovered and
+# persisted to data/symbol_map.json; ambiguities are confirmed once.
+universe:
+  - EURUSD
+  - GBPUSD
+  - USDJPY
+  - USDCHF
+  - USDCAD
+  - AUDUSD
+  - NZDUSD
+  - EURJPY
+  - GBPJPY
+  - XAUUSD
+
+# Measured scalp eligibility thresholds (§4.1). A symbol trades only if ALL hold,
+# measured — never assumed. Verdicts are written by `scalp-eligibility`.
+scalp_eligibility:
+  max_stops_level_points: 30
+  max_spread_p50_points:
+    default: 15
+    XAUUSD: 40
+  min_ticks_per_minute: 10
+
+per_symbol_caps:
+  default: {max_positions: 1}

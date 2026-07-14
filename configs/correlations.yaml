@@ -1,0 +1,14 @@
+# Pairwise absolute correlation weights used for correlation-weighted open risk.
+# Re-estimated nightly by the research loop (proposals only, never hot-patched).
+max_correlation_weighted_risk: 0.0060
+pairs:
+  EURUSD:GBPUSD: 0.8
+  EURUSD:USDCHF: 0.85
+  EURUSD:AUDUSD: 0.6
+  GBPUSD:GBPJPY: 0.6
+  USDJPY:EURJPY: 0.7
+  USDJPY:GBPJPY: 0.65
+  EURJPY:GBPJPY: 0.8
+  AUDUSD:NZDUSD: 0.85
+  USDCAD:AUDUSD: 0.5
+  XAUUSD:AUDUSD: 0.4

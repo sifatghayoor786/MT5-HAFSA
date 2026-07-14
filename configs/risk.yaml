@@ -1,0 +1,21 @@
+risk_per_trade: 0.0002            # 0.02% equity — frequency-scaled
+max_risk_per_trade: 0.0010
+max_total_open_risk: 0.0060
+daily_equity_loss_halt: 0.0100
+weekly_equity_loss_halt: 0.0250
+hard_drawdown_halt: 0.0500
+max_simultaneous_positions: 3
+max_positions_per_symbol: 1
+max_trades_per_hour_global: 30
+max_trades_per_symbol_per_hour: 10
+max_trades_per_day_global: 150
+loss_velocity_halt: {R_lost: 6, window_minutes: 60, pause_minutes: 60}
+consecutive_loss_micro_cooldown: {losses: 3, minutes: 15}   # per symbol x strategy
+anti_churn_seconds: 90            # no same-direction re-entry after stop-out
+order_storm_fuse_per_minute: 10   # global hard fuse on order_send calls
+slippage_breaker: {window_fills: 30, p90_multiple: 2.0}     # broker fading us -> halt entries
+max_hold_seconds_default: 900     # EA-enforced hard time-stop
+min_margin_level_pct: 500
+max_slippage_points: {default: 8, XAUUSD: 25}
+max_spread_points:   {default: 15, XAUUSD: 40}
+canary_fills: 50

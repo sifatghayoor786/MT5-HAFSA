@@ -1,0 +1,21 @@
+# Commission per lot per side, in account currency (converted to points by the
+# cost engine using tick_value/tick_size and contract size at decision time).
+# Conservative defaults until measured from real fills.
+commission_per_lot_per_side:
+  default: 3.0
+  XAUUSD: 3.5
+
+# Conservative slippage priors (points) used until live telemetry provides p50.
+slippage_prior_points:
+  default: 3
+  XAUUSD: 10
+
+cost_gate:
+  k_multiple: 4.0          # tp_distance_points >= k * cost_points
+  k_floor: 3.0             # hard floor; configs below this are rejected at load
+  min_net_rr: 1.0
+  min_net_rr_floor: 0.8    # if configured below 1.0, WR_be is displayed everywhere
+
+liquidity_window:
+  spread_percentile_max: 40   # entry only when spread <= p40 of 20-day same-hour dist
+  history_days: 20
