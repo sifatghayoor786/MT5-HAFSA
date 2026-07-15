@@ -1,0 +1,17 @@
+# All times are BROKER SERVER time (HH:MM). Converted using the empirical
+# broker-UTC offset from core/clock.py.
+sessions:
+  london_open:  {start: "10:00", end: "12:00"}
+  ny_open:      {start: "16:30", end: "18:30"}
+  overlap:      {start: "16:30", end: "19:00"}
+
+entry_windows:               # entries allowed only inside these windows
+  default: [london_open, ny_open, overlap]
+
+rollover_blackout: {start: "23:55", end: "00:10"}
+friday_cutoff: "20:00"       # no new entries after this server time on Friday
+
+news_blackout:
+  high_impact_minutes: 20    # +/- around event for affected currencies
+  medium_impact_minutes: 10
+  stale_calendar_hours: 48   # calendar older than this => news_status=UNKNOWN => block

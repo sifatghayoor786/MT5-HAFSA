@@ -1,0 +1,21 @@
+[
+ {
+  "config_hash": "b51c2df7b2ef3164",
+  "correlation_id": "f541f2e8465c",
+  "entry_price": 1.100828,
+  "max_hold_s": 600,
+  "oco_group": "",
+  "pending_type": "",
+  "reason": "stop-run through 1.101 rejected",
+  "side": "SELL",
+  "signal_time_utc": "2026-07-14T10:30:17Z",
+  "sl_points": 43,
+  "strategy_id": "F5",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:30:17Z",
+  "tp_points": 86,
+  "trigger": "tick_armed",
+  "trigger_id": "f541f2e8465c"
+ }
+]

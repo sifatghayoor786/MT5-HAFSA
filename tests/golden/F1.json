@@ -1,0 +1,21 @@
+[
+ {
+  "config_hash": "b73881a9f0e886e9",
+  "correlation_id": "7f8373dfea57",
+  "entry_price": 1.10074,
+  "max_hold_s": 300,
+  "oco_group": "",
+  "pending_type": "",
+  "reason": "burst z=37.64 rate=61/min",
+  "side": "BUY",
+  "signal_time_utc": "2026-07-14T10:31:10Z",
+  "sl_points": 66,
+  "strategy_id": "F1",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:31:10Z",
+  "tp_points": 132,
+  "trigger": "tick_armed",
+  "trigger_id": "7f8373dfea57"
+ }
+]

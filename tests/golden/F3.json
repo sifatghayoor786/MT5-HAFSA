@@ -1,0 +1,21 @@
+[
+ {
+  "config_hash": "7d040621c419f506",
+  "correlation_id": "5ede98cdb4b6",
+  "entry_price": 1.1005,
+  "max_hold_s": 900,
+  "oco_group": "",
+  "pending_type": "buy_stop",
+  "reason": "open expansion above 1.1004",
+  "side": "BUY",
+  "signal_time_utc": "2026-07-14T10:30:04Z",
+  "sl_points": 49,
+  "strategy_id": "F3",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:30:04Z",
+  "tp_points": 98,
+  "trigger": "pending",
+  "trigger_id": "5ede98cdb4b6"
+ }
+]

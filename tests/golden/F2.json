@@ -1,0 +1,21 @@
+[
+ {
+  "config_hash": "994ed5b51afc76d8",
+  "correlation_id": "392c62ae1750",
+  "entry_price": 1.099145,
+  "max_hold_s": 600,
+  "oco_group": "",
+  "pending_type": "",
+  "reason": "sweep of 1.099 reclaimed",
+  "side": "BUY",
+  "signal_time_utc": "2026-07-14T10:30:16Z",
+  "sl_points": 35,
+  "strategy_id": "F2",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:30:16Z",
+  "tp_points": 70,
+  "trigger": "tick_armed",
+  "trigger_id": "392c62ae1750"
+ }
+]

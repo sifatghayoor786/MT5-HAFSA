@@ -1,0 +1,75 @@
+# Strategy registry. version+params are hashed into every signal (config_hash).
+# trigger: tick_armed (armed-intent market entry) | pending (pre-placed server-side).
+strategies:
+  F1:
+    name: spread_normalised_momentum_burst
+    enabled: true
+    version: 1
+    trigger: tick_armed
+    context_tf: M5
+    max_signal_age_s: 2.0
+    max_hold_s: 300
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 120
+    params: {burst_z: 2.5, window_ticks: 60, min_tick_rate: 20, spread_pctl_max: 30}
+  F2:
+    name: micro_liquidity_sweep_snapback
+    enabled: true
+    version: 1
+    trigger: tick_armed
+    context_tf: M5
+    max_signal_age_s: 3.0
+    max_hold_s: 600
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 180
+    params: {swing_lookback_bars: 24, sweep_min_points: 15, reclaim_ticks: 10}
+  F3:
+    name: session_open_expansion
+    enabled: true
+    version: 1
+    trigger: pending
+    context_tf: M15
+    max_signal_age_s: 30.0
+    max_hold_s: 900
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 3600
+    params: {pre_window_bars: 8, level_offset_points: 10, order_ttl_s: 1800}
+  F4:
+    name: compression_micro_breakout_oco
+    enabled: true
+    version: 1
+    trigger: pending
+    context_tf: M5
+    max_signal_age_s: 30.0
+    max_hold_s: 600
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 900
+    params: {box_bars: 12, box_max_points: 40, breakout_offset_points: 8, order_ttl_s: 1200}
+  F5:
+    name: stop_run_reversion
+    enabled: true
+    version: 1
+    trigger: tick_armed
+    context_tf: M5
+    max_signal_age_s: 3.0
+    max_hold_s: 600
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 300
+    params: {level_lookback_bars: 48, run_min_points: 20, rejection_ticks: 12}
+  F6:
+    name: ml_probability_filter
+    enabled: false            # scaffold only; may scale confidence, never originate
+    version: 0
+    trigger: tick_armed
+    context_tf: M5
+    max_signal_age_s: 2.0
+    max_hold_s: 300
+    min_cost_multiple: 4.0
+    min_rr: 1.0
+    cooldown_s: 0
+    params: {}
