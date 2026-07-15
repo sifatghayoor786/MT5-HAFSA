@@ -1,0 +1,40 @@
+[
+ {
+  "config_hash": "ba522cab2fb42049",
+  "correlation_id": "6f916b3626cb",
+  "entry_price": 1.10038,
+  "max_hold_s": 600,
+  "oco_group": "oco-EURUSD-1784025004000",
+  "pending_type": "buy_stop",
+  "reason": "compression box 1.1-1.1003",
+  "side": "BUY",
+  "signal_time_utc": "2026-07-14T10:30:04Z",
+  "sl_points": 45,
+  "strategy_id": "F4",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:30:04Z",
+  "tp_points": 90,
+  "trigger": "pending",
+  "trigger_id": "6f916b3626cb"
+ },
+ {
+  "config_hash": "ba522cab2fb42049",
+  "correlation_id": "1047c8eeb228",
+  "entry_price": 1.09992,
+  "max_hold_s": 600,
+  "oco_group": "oco-EURUSD-1784025004000",
+  "pending_type": "sell_stop",
+  "reason": "compression box 1.1-1.1003",
+  "side": "SELL",
+  "signal_time_utc": "2026-07-14T10:30:04Z",
+  "sl_points": 45,
+  "strategy_id": "F4",
+  "strategy_version": 1,
+  "symbol": "EURUSD",
+  "tick_time_utc": "2026-07-14T10:30:04Z",
+  "tp_points": 90,
+  "trigger": "pending",
+  "trigger_id": "1047c8eeb228"
+ }
+]
