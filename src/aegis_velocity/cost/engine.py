@@ -101,6 +101,10 @@ class CostEngine:
         # measured slippage p50 per symbol (points), fed by live telemetry
         self._measured_slippage: dict[str, float] = {}
 
+    @property
+    def spreads(self) -> SpreadHistory:
+        return self._spreads
+
     def update_measured_slippage(self, symbol: str, p50_points: float) -> None:
         self._measured_slippage[symbol] = p50_points
 
