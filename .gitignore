@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# AEGIS VELOCITY runtime state (ledger, journals, ticks, tokens) - never committed
+data/
+.coverage

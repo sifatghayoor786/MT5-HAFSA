@@ -187,3 +187,130 @@ Success: no issues found in 40 source files
 $ python3 -m pytest tests/
 147 passed in 5.69s
 ```
+
+## Stage 9 — Auditor + dashboard + CLI — COMPLETE
+
+Built `audit/stats.py` (Wilson 95% CI with the n<30 "insufficient sample" display rule,
+PF/expectancy/max-DD, §10 quarantine math over the rolling last 100 closed trades —
+Wilson LB < WR_be OR PF < 0.85 OR DD > walk-forward p95 — and Benjamini–Hochberg FDR),
+`audit/auditor.py` (write-behind analytics worker; environments NEVER merged; order facts
+are written synchronously by execution, enrichment is async), `arming.py` (token write /
+read / validate — auto-invalidation on account/server/config-hash mismatch, emergency stop,
+hard-drawdown halt, bridge loss; disarm leaves an audit stub), `dashboard/app.py`
+(FastAPI + SSE, 127.0.0.1, event/ledger data only), `runtime.py` (desk wiring + all CLI
+commands), full `cli.py` per §15 with the HUMAN-ONLY TTY guard (tested: `activate-live`,
+`promote-live-full`, `run --mode live|live_canary` exit 3 with REFUSED when non-interactive).
+
+## Stage 10 — Tick backtester + promotion pipeline — COMPLETE (INSUFFICIENT_DATA declared)
+
+Built `backtest/tick_engine.py` (bid/ask fills; market entries delayed by seeded 100–400 ms
+latency; pendings trigger at touch on the correct book side with zero client latency; SL/TP
+at touch; commission; stressed-cost multipliers spread×1.5/slippage×2/latency×2; empty tick
+lists REFUSED — bar backtests are NON-EVIDENCE by construction; look-ahead harness verifies
+windows end exactly at the decision tick) and `pipeline/promotion.py` (OOS ≥ 1000, PF ≥ 1.10
++ positive expectancy under stress, parameter plateau ≥ 70% retention, Monte Carlo 5th-pct
+path, top-5-removal — fixed a real defect where value-based filtering removed more than 5
+trades — BH-FDR q ≤ 0.10, shadow/demo/canary gates; INSUFFICIENT_DATA is never a pass and
+outranks FAIL in the verdict).
+
+**Pipeline run on real evidence: INSUFFICIENT_DATA.** No live/recorded broker ticks exist in
+this environment (no terminal); only sim-generated ticks exist and they are non-evidence for
+promotion. `backtest`/`walkforward` CLI report this honestly. NO STRATEGY QUALIFIED — and per
+§2.3 that is a valid outcome, stated plainly.
+
+Gate:
+
+```
+$ ruff check .
+All checks passed!
+$ python3 -m mypy src/aegis_velocity        # ENTIRE package, all 55 files, strict
+Success: no issues found in 55 source files
+$ python3 -m pytest tests/
+198 passed in 9.15s
+$ pytest --cov=risk --cov=cost --cov=execution --cov=bridge --cov-branch
+TOTAL 1390 stmts, branch coverage 90%
+```
+
+## Stage 11 — Shadow demonstration — COMPLETE (sim)
+
+Run on `SimMt5Client` with a clearly-labelled deterministic seeded random walk
+(simulation data — never presented as broker data). Verbatim:
+
+```
+$ python -m aegis_velocity calendar-import configs/calendar/sample_calendar.csv
+imported 5 calendar events
+$ python -m aegis_velocity discover-symbols
+mapped 10/10 symbols [SIM]
+$ python -m aegis_velocity scalp-eligibility
+  EURUSD: ELIGIBLE spread_p50=8.0 ticks/min=60.0 stops=10 []
+  ... (10/10 measured verdicts written to data/scalp_eligibility.json)
+$ python -m aegis_velocity run --mode shadow --duration 3600
+[SIM] SHADOW scan over 3600 scripted ticks/symbol (simulation data)
+scan done: 602 signals, 602 decisions recorded; ledger OK (1205 rows)
+$ python -m aegis_velocity verify-ledger
+ledger: OK rows=1205 chain verified
+```
+
+Decision distribution (from the hash-verified ledger): 92 APPROVE, 510 REJECT.
+Strategies that fired: F2 (296), F5 (206), F3 (100). Top machine-readable reject
+reasons: SESSION_BLOCKED ×397 (the 3600-step walk spans a full sim trading day, so
+out-of-session periods are correctly blocked), LIQUIDITY_WINDOW ×316 (spread above the
+same-hour p40 or history still thin — fails closed), COST_GATE_FAIL ×8, RR_TOO_LOW ×8.
+Every decision carries correlation_id, cost_points, cost_multiple, net RR and WR_be.
+NO ORDER of any kind was sent: shadow preflight hard-blocks sends and the scan loop
+never invokes the execution engine.
+
+## Stage 12 — Demo validation + live preparation — NOT EXECUTED (USER-ACTION)
+
+No user authorisation for demo orders was given in this session, and no terminal exists
+on this host. Nothing was traded anywhere, real or demo. The launch checklist for the
+Windows trading host is in the Final Report below.
+
+---
+
+# FINAL REPORT (§18)
+
+**Build status: PARTIALLY COMPLETE.** Everything buildable and testable on this Linux
+host is built and green (stages 1–11, sim path). Gaps, all environment-bound, none
+code-stubbed:
+1. `RealMt5Client` is written but has NEVER touched a terminal — untested against real MT5.
+2. `AegisFastGuard.mq5` is complete source but UNCOMPILED (no MetaEditor on Linux); its
+   behaviour is mirrored by `SimEa` in CI and its never-originates invariant is enforced
+   by a static source test, which is not a substitute for on-host verification.
+3. Promotion evidence: INSUFFICIENT_DATA everywhere — no recorded broker ticks exist.
+   No strategy is promoted; the desk would start in SHADOW only.
+4. The dashboard serves status/ledger/SSE but implements a subset of the §14 panels.
+5. F6 is a permanently-off scaffold (by design).
+
+**Execution verification: sim-fixture only.** No real, demo, or live order was placed or
+implied anywhere in this build.
+
+**Strategy evidence: INSUFFICIENT_DATA / NO STRATEGY QUALIFIED** (see Stage 10). No
+accuracy or profit figure exists anywhere in this repository, projected or otherwise.
+
+**MT5 verification: none possible — explicit no-terminal statement.** This environment is
+Linux; the MetaTrader5 package and terminal are Windows-only.
+
+**Test results:** 198 passed, 0 failed; ruff clean; mypy --strict clean on all 55 source
+files; branch coverage on risk/cost/execution/bridge = 90%.
+
+**Launch instructions (Windows trading host, in order):**
+ 1. Install Python 3.11+ 64-bit, MT5 terminal, `pip install -e .[dev] MetaTrader5`.
+ 2. Copy `.env.example` → `.env`; fill MT5_TERMINAL_PATH/LOGIN/PASSWORD/SERVER.
+    Never commit `.env` (already git-ignored).
+ 3. `python -m aegis_velocity doctor` — must show REAL-TERMINAL capable.
+ 4. `python -m aegis_velocity test-mt5` — verifies login/server/hedging; netting is
+    refused for execution.
+ 5. Compile the EA: `metaeditor64.exe /compile:"mql5\AegisFastGuard.mq5" /log` —
+    record the log in BUILDLOG; attach to one chart; enable Algo Trading; allow
+    socket connections to 127.0.0.1 (Tools → Options → Expert Advisors).
+ 6. `python -m aegis_velocity discover-symbols` then `scalp-eligibility` (measured).
+ 7. `python -m aegis_velocity record-ticks --hours 8` (repeat across sessions) —
+    this is the evidence source for `backtest` / `walkforward`.
+ 8. `python -m aegis_velocity run --mode shadow` ≥ 5 sessions; check parity + dashboard
+    at http://127.0.0.1:8000.
+ 9. Only after §11 gates pass: `run --mode demo` (≥ 300 fills, ≥ 3 clean restarts).
+10. HUMAN-ONLY, typed in a console: `activate-live` (requires the phrase), then
+    `run --mode live_canary` (50 min-lot fills), then `promote-live-full`.
+11. Monitoring: dashboard red banner while armed; `emergency-stop [--flatten]` at any
+    time (also invalidates arming); `disarm-live` to stand down.

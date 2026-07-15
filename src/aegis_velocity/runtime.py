@@ -11,6 +11,7 @@ from __future__ import annotations
 import getpass
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -42,6 +43,8 @@ from aegis_velocity.mt5.symbols import (
 from aegis_velocity.risk.commander import RiskCommander
 from aegis_velocity.strategies import STRATEGY_REGISTRY
 from aegis_velocity.strategies.base import StrategyContext
+
+TickCallback = Callable[[str, Tick], None]
 
 
 @dataclass
@@ -121,9 +124,16 @@ def build_desk(root: Path, mode: TradingMode) -> Desk:
 # --------------------------------------------------------------------- helpers
 
 
-def _sim_walk(sim: SimMt5Client, symbols: list[str], steps: int, seed: int = 42,
-              spreads: SpreadHistory | None = None) -> None:
-    """Deterministic seeded random walk. SIMULATION DATA, labelled as such."""
+def _sim_walk(
+    sim: SimMt5Client,
+    symbols: list[str],
+    steps: int,
+    seed: int = 42,
+    spreads: SpreadHistory | None = None,
+    on_tick: TickCallback | None = None,
+) -> None:
+    """Deterministic seeded random walk. SIMULATION DATA, labelled as such.
+    `on_tick` receives EVERY scripted tick synchronously (no pump sampling)."""
     rng = random.Random(seed)
     prices = {s: (155.0 if s.endswith("JPY") else 2400.0 if s == "XAUUSD" else 1.10)
               for s in symbols}
@@ -139,6 +149,8 @@ def _sim_walk(sim: SimMt5Client, symbols: list[str], steps: int, seed: int = 42,
             tick = sim.push_tick(symbol, bid, ask, advance_s=1.0)
             if spreads is not None:
                 spreads.record(symbol, tick.time, spread_pts)
+            if on_tick is not None:
+                on_tick(symbol, tick)
 
 
 def _sim_bars(sim: SimMt5Client, symbol: str, tf_s: int, count: int) -> None:
@@ -321,6 +333,9 @@ def _scan_loop(desk: Desk, duration_s: float) -> int:
             )
             for signal in STRATEGY_REGISTRY[sid](ctx):
                 signals_seen += 1
+                cooldown_until[(sid, symbol)] = tick.time + timedelta(
+                    seconds=strategy_cfg.cooldown_s
+                )
                 desk.ledger.append(
                     "signal", signal.model_dump(mode="json"),
                     correlation_id=signal.correlation_id,
@@ -338,25 +353,24 @@ def _scan_loop(desk: Desk, duration_s: float) -> int:
                     correlation_id=signal.correlation_id,
                 )
 
-    desk.gateway.subscribe_ticks(on_tick)
-
     if desk.is_sim:
         sim = desk.client
         assert isinstance(sim, SimMt5Client)
         for s in symbols:
             _sim_bars(sim, s, 300, 60)
+        steps = int(duration_s) if duration_s > 0 else 300
+        print(f"[SIM] {desk.mode.value} scan over {steps} scripted ticks/symbol "
+              "(simulation data)")
+        # every scripted tick is delivered synchronously: deterministic scan
+        _sim_walk(sim, list(symbols), steps=steps, spreads=desk.cost_engine.spreads,
+                  on_tick=on_tick)
+    else:  # pragma: no cover - real terminal only
+        desk.gateway.subscribe_ticks(on_tick)
         desk.gateway._pump_symbols = list(symbols)
         import threading
 
         pump = threading.Thread(target=desk.gateway._run_pump, daemon=True)
         pump.start()
-        steps = int(duration_s) if duration_s > 0 else 300
-        print(f"[SIM] {desk.mode.value} scan over {steps} scripted ticks/symbol "
-              "(simulation data)")
-        spreads = desk.cost_engine._spreads
-        _sim_walk(sim, list(symbols), steps=steps, spreads=spreads)
-        time.sleep(0.5)
-    else:  # pragma: no cover - real terminal only
         deadline = time.monotonic() + (duration_s or 3600.0)
         while time.monotonic() < deadline:
             time.sleep(1.0)

@@ -6,9 +6,12 @@ Full specification lives in the V3 master prompt; `BUILDLOG.md` records every st
 
 ## Current stage
 
-Stage 1 (inspect) complete — sim-only path declared: this environment is Linux, no MT5
-terminal possible. Later stages in progress; BUILDLOG.md is the authoritative record.
-Real-terminal steps are USER-ACTION items for the Windows trading host.
+Stages 1–11 COMPLETE on the sim path (Linux, no MT5 terminal possible here).
+Stage 12 (demo/live prep) NOT EXECUTED — USER-ACTION on the Windows trading host.
+Open gaps: RealMt5Client never exercised against a terminal; EA source uncompiled;
+promotion pipeline evidence = INSUFFICIENT_DATA (no recorded broker ticks); dashboard
+implements a subset of §14 panels. BUILDLOG.md carries the verbatim gates and the
+full §18 final report incl. the numbered launch checklist.
 
 ## Hard rules (do not relax)
 
