@@ -65,3 +65,36 @@ config OK: 10 symbols, strategies enabled: F1, F2, F3, F4, F5, mode=SHADOW, conf
 
 Tamper test: editing a ledger payload or deleting a row makes `verify()` fail — covered in
 `tests/test_ledger.py`.
+
+## Stage 3 — MT5 layer + tick recorder — COMPLETE (sim path)
+
+Built: `mt5/protocol.py` (`Mt5Client` Protocol + broker dataclasses), `mt5/retcodes.py`
+(§4.2 policy table — execution is table-driven; `None` result ⇒ UNKNOWN_OUTCOME),
+`mt5/sim.py` (`SimMt5Client`: scripted ticks, retcode injection incl. execute-anyway for
+unknown-outcome truth, partial fills, latency injection, hedging/netting toggle, investor
+block, pending trigger/expiry at touch, SL/TP execution, floating-P&L equity),
+`mt5/real.py` (`RealMt5Client`, import-guarded, Windows-only — NOT exercised here),
+`mt5/gateway.py` (single worker thread owns every client call; P0–P3 priority heap;
+tick pump 20–50 ms with dedupe; queue/latency metrics; TOO_MANY_REQUESTS backoff),
+`mt5/symbols.py` (discovery: exact/suffix/prefix, ambiguity reported never guessed;
+measured scalp eligibility failing closed on thin samples), `mt5/recorder.py`
+(JSONL tick recorder + loader).
+
+Stage gate integration test (`tests/test_stage3_integration.py`):
+connect → discover (EURUSD→EURUSDm) → pump+record → pending place → trigger at touch →
+partial fill (10010) → unknown-outcome (no result, broker executed) → reconcile by
+comment `AEG|{key}` + magic finds the position. PASSES on sim.
+
+Gate (verbatim):
+
+```
+$ ruff check .
+All checks passed!
+$ python3 -m mypy src/aegis_velocity/core src/aegis_velocity/mt5 src/aegis_velocity/doctor.py
+Success: no issues found in 18 source files
+$ python3 -m pytest tests/
+61 passed in 2.35s
+```
+
+USER-ACTION (Windows host): `python -m aegis_velocity test-mt5` to record the real
+terminal round-trip; real tick recording via `record-ticks --hours N`.
