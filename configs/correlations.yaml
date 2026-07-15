@@ -1,6 +1,6 @@
 # Pairwise absolute correlation weights used for correlation-weighted open risk.
 # Re-estimated nightly by the research loop (proposals only, never hot-patched).
-max_correlation_weighted_risk: 0.0060
+max_correlation_weighted_risk: 0.0040   # tighter than max_total_open_risk by design
 pairs:
   EURUSD:GBPUSD: 0.8
   EURUSD:USDCHF: 0.85

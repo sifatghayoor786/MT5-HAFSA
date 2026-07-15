@@ -39,7 +39,7 @@ def default_spec(name: str = "EURUSD") -> SymbolSpec:
             tick_value_loss=1.0, contract_size=100.0, volume_min=0.01, volume_max=100.0,
             volume_step=0.01, trade_stops_level=20, freeze_level=5,
             filling_modes=(FillingMode.FOK, FillingMode.IOC),
-            currency_profit="USD", currency_margin="USD",
+            currency_profit="USD", currency_margin="XAU",
         )
     if name.endswith("JPY"):
         return SymbolSpec(
@@ -54,7 +54,7 @@ def default_spec(name: str = "EURUSD") -> SymbolSpec:
         tick_value_loss=1.0, contract_size=100_000.0, volume_min=0.01, volume_max=200.0,
         volume_step=0.01, trade_stops_level=10, freeze_level=3,
         filling_modes=(FillingMode.FOK, FillingMode.IOC, FillingMode.RETURN),
-        currency_profit="USD", currency_margin="USD",
+        currency_profit="USD", currency_margin=name[:3] if len(name) >= 6 else "USD",
     )
 
 
@@ -225,7 +225,12 @@ class SimMt5Client:
         spec = self.specs.get(symbol)
         if spec is None:
             return None
-        return volume * spec.contract_size * price / self.leverage
+        notional_base = volume * spec.contract_size
+        if spec.currency_margin == self.currency:
+            # base currency IS the account currency (e.g. USDJPY on a USD account)
+            return notional_base / self.leverage
+        # convert base->account currency via price (XXXUSD pairs, metals)
+        return notional_base * price / self.leverage
 
     def last_error(self) -> tuple[int, str]:
         return self._last_error
